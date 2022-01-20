@@ -2,7 +2,9 @@ class Director {
     private val outputService = Output()
     private val inputService = Input()
     private val fileService = FileIO()
+    private val sortService = Sort()
     var quotes = fileService.readQuoteFile()
+    var sortedQuotes = mutableListOf<Quote>()
 
     fun start() {
         programLoop()
@@ -13,26 +15,96 @@ class Director {
         while (!inputService.isDone) {
             outputService.launchOptions()
             when (inputService.inService()) {
-                "1" -> println("1")
-                "2" -> searchResultControl()
+                "1" -> search()
+                "2" -> {
+                    outputService.searchType = "View All"
+                    viewAllControl()
+                }
                 "3" -> addQuote()
                 "Q", "q" -> inputService.isDone = true
             }
         }
     }
 
+    private fun search() {
+        outputService.searchMenu()
+        when (inputService.inService()) {
+            "1" -> {
+                outputService.searchType = "Word"
+                searchWord()
+            }
+            "2" -> {
+                outputService.searchType = "Source"
+                searchSource()
+            }
+            "3" -> {
+                outputService.searchType = "Keyword"
+                println("Search by Keyword")
+            }
+            "R", "r" -> return
+            else -> search()
+        }
+    }
+
+    private fun searchWord() {
+        outputService.searchQuery()
+        val word = inputService.inService()
+        if (word != null) {
+            sortedQuotes = sortService.sortWord(quotes, word)
+            searchResultControl()
+        } else {
+            outputService.creationError()
+        }
+    }
+
+    private fun searchSource() {
+        outputService.searchQuery()
+        val source = inputService.inService()
+        if (source != null) {
+            sortedQuotes = sortService.sortSource(quotes, source)
+            searchResultControl()
+        } else {
+            outputService.creationError()
+        }
+    }
+
     private fun searchResultControl() {
+        outputService.searchResult(sortedQuotes)
+        when (inputService.inService()) {
+            "1" -> viewQuote(0)
+            "2" -> viewQuote(1)
+            "3" -> viewQuote(2)
+            ">" -> {
+                outputService.scrollStart += 3
+                searchResultControl()
+            }
+            "<" -> {
+                outputService.scrollStart -= 3
+                searchResultControl()
+            }
+            "R", "r" -> {
+                outputService.scrollStart = 0
+                return
+            }
+            else -> searchResultControl()
+        }
+    }
+
+    private fun viewAllControl() {
         outputService.searchResult(quotes)
         when (inputService.inService()) {
             "1" -> viewQuote(0)
             "2" -> viewQuote(1)
             "3" -> viewQuote(2)
             ">" -> {outputService.scrollStart += 3
-            searchResultControl()}
+            viewAllControl()}
             "<" -> {outputService.scrollStart -= 3
-            searchResultControl()}
-            "R", "r" -> return
-            else -> searchResultControl()
+                viewAllControl()}
+            "R", "r" -> {
+                outputService.scrollStart = 0
+                return
+            }
+            else -> viewAllControl()
         }
     }
 
@@ -65,7 +137,7 @@ class Director {
         when (inputService.inService()) {
             "E", "e" -> editQuote(index + outputService.scrollStart)
             "D", "d" -> deleteQuote(index + outputService.scrollStart)
-            "R", "r" -> searchResultControl()
+            "R", "r" -> return
             else -> viewQuote(index)
         }
     }

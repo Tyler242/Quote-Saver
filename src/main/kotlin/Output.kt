@@ -1,6 +1,7 @@
 class Output {
 
     var scrollStart = 0
+    var searchType: String = "View All"
 
     fun launchOptions() {
         """ Display the main menu options """
@@ -13,6 +14,20 @@ class Output {
         print("> ")
     }
 
+    fun searchMenu() {
+        println("\nSearch Options")
+        println("1. Search by word")
+        println("2. Search by source")
+        println("3. Search by keywords")
+        println("R to return")
+        print("> ")
+    }
+
+    fun searchQuery() {
+        println("\nEnter $searchType to search for: ")
+        print("> ")
+    }
+
     fun searchResult(quotes: MutableList<Quote>) {
         val lenQuotes = quotes.size
         if (scrollStart >= lenQuotes) {
@@ -21,7 +36,7 @@ class Output {
             scrollStart = lenQuotes - 1
         }
 
-        println("Result:")
+        println("Result for $searchType search:")
         for (x in 0..2) {
             if (x + scrollStart < lenQuotes) {
                 println("${(x+1)}. Quote: ${quotes[x + scrollStart].text}")

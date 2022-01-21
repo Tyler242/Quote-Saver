@@ -1,6 +1,7 @@
 import java.io.File
 import java.io.InputStream
 import java.io.PrintWriter
+import java.time.LocalDate
 
 class FileIO {
     fun readQuoteFile(): MutableList<Quote> {
@@ -41,12 +42,17 @@ class FileIO {
         val keyValues = quoteBlocks.split('/')
 
         val quote = keyValues[0].split(">")[1]
+
         val source = keyValues[1].split(">")[1]
-        val date = keyValues[2].split(">")[1]
+
+        val dateString = keyValues[2].split(">")[1]
+        val dateList = dateString.split("-")
+        val date = LocalDate.of(dateList[0].toInt(), dateList[1].toInt(), dateList[2].toInt())
+
         val keywords = keyValues[3].split(">")[1]
         val keywordsList = keywords.split(",")
 
-        return Quote(quote, source, date.toInt(), keywordsList)
+        return Quote(quote, source, date, keywordsList)
     }
 
     private fun configText(quotes: MutableList<Quote>): String {
@@ -57,7 +63,7 @@ class FileIO {
 
 //        format the quote objects to text
         quotes.forEach {
-            var quoteString = "{Text>${it.text}/Source>${it.source}/Date>${it.date}/Keyword>"
+            var quoteString = "{Text>${it.text}/Source>${it.source}/Date>${it.date.toString()}/Keyword>"
             it.keywords.forEach { tag -> quoteString += if (tag != it.keywords[it.keywords.size - 1]) "$tag," else "$tag" }
             textToWrite += quoteString
         }

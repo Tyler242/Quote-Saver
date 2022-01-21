@@ -1,3 +1,5 @@
+import java.time.LocalDate
+
 class Director {
     private val outputService = Output()
     private val inputService = Input()
@@ -123,7 +125,7 @@ class Director {
             return
         }
 
-        quotes.add(Quote(text, source, 12345, keywords))
+        quotes.add(Quote(text, source, LocalDate.now(), keywords))
     }
 
     private fun viewQuote(index: Int) {
@@ -198,10 +200,13 @@ class Director {
     }
 
     private fun deleteQuote(index: Int) {
+        val quote = sortService.sortedQuotes[index]
+        val quoteMainIndex = quotes.indexOf(quote)
         outputService.deleteConfirmation()
         val input = inputService.inService()
         if (input == "Y" || input == "y") {
             sortService.sortedQuotes.removeAt(index)
+            quotes.removeAt(quoteMainIndex)
         }
         return
     }

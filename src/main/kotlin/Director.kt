@@ -2,9 +2,8 @@ class Director {
     private val outputService = Output()
     private val inputService = Input()
     private val fileService = FileIO()
-    private val sortService = Sort()
-    var quotes = fileService.readQuoteFile()
-    var sortedQuotes = mutableListOf<Quote>()
+    private val sortService = Sorter()
+    private var quotes = fileService.readQuoteFile()
 
     fun start() {
         programLoop()
@@ -15,13 +14,18 @@ class Director {
         while (!inputService.isDone) {
             outputService.launchOptions()
             when (inputService.inService()) {
-                "1" -> search()
+                "1" -> {
+                    sortService.quotesToSearch = quotes
+                    search()
+                }
                 "2" -> {
                     outputService.searchType = "View All"
-                    viewAllControl()
+                    sortService.sortedQuotes = quotes
+                    searchResultControl()
                 }
                 "3" -> addQuote()
                 "Q", "q" -> inputService.isDone = true
+                else -> programLoop()
             }
         }
     }
@@ -39,7 +43,8 @@ class Director {
             }
             "3" -> {
                 outputService.searchType = "Keyword"
-                println("Search by Keyword")
+                searchKeyword()
+
             }
             "R", "r" -> return
             else -> search()
@@ -50,7 +55,7 @@ class Director {
         outputService.searchQuery()
         val word = inputService.inService()
         if (word != null) {
-            sortedQuotes = sortService.sortWord(quotes, word)
+            sortService.sortWord(word)
             searchResultControl()
         } else {
             outputService.creationError()
@@ -61,7 +66,18 @@ class Director {
         outputService.searchQuery()
         val source = inputService.inService()
         if (source != null) {
-            sortedQuotes = sortService.sortSource(quotes, source)
+            sortService.sortSource(source)
+            searchResultControl()
+        } else {
+            outputService.creationError()
+        }
+    }
+
+    private fun searchKeyword() {
+        outputService.searchQuery()
+        val keywordToSearch = inputService.inService()
+        if (keywordToSearch != null) {
+            sortService.sortKeyword(keywordToSearch)
             searchResultControl()
         } else {
             outputService.creationError()
@@ -69,7 +85,7 @@ class Director {
     }
 
     private fun searchResultControl() {
-        outputService.searchResult(sortedQuotes)
+        outputService.searchResult(sortService.sortedQuotes)
         when (inputService.inService()) {
             "1" -> viewQuote(0)
             "2" -> viewQuote(1)
@@ -90,36 +106,15 @@ class Director {
         }
     }
 
-    private fun viewAllControl() {
-        outputService.searchResult(quotes)
-        when (inputService.inService()) {
-            "1" -> viewQuote(0)
-            "2" -> viewQuote(1)
-            "3" -> viewQuote(2)
-            ">" -> {outputService.scrollStart += 3
-            viewAllControl()}
-            "<" -> {outputService.scrollStart -= 3
-                viewAllControl()}
-            "R", "r" -> {
-                outputService.scrollStart = 0
-                return
-            }
-            else -> viewAllControl()
-        }
-    }
-
     private fun addQuote() {
 
-        outputService.addText()
+        outputService.editText()
         val text = inputService.inService()
 
-        outputService.addSource()
+        outputService.editSource()
         val source = inputService.inService()
 
-        outputService.addDate()
-        val date = inputService.inService()
-
-        outputService.addTags()
+        outputService.editKeywords()
         val keywordsString = inputService.inService()
         val keywords: List<String> = keywordsString?.split(",") ?: listOf()
 
@@ -133,18 +128,21 @@ class Director {
 
     private fun viewQuote(index: Int) {
         """Control the single quote menu"""
-        outputService.viewSingleQuote(quotes[index + outputService.scrollStart])
+        outputService.viewSingleQuote(sortService.sortedQuotes[index + outputService.scrollStart])
         when (inputService.inService()) {
             "E", "e" -> editQuote(index + outputService.scrollStart)
             "D", "d" -> deleteQuote(index + outputService.scrollStart)
-            "R", "r" -> return
+            "R", "r" -> searchResultControl()
             else -> viewQuote(index)
         }
     }
 
     private fun editQuote(index: Int) {
         var doneEdit = false
-        val quote = quotes[index]
+        val quote = sortService.sortedQuotes[index]
+//        this is the index of the quote being
+//        edited in the main quotes list
+        val quoteMainIndex = quotes.indexOf(quote)
 
         var newText = ""
         var newSource = ""
@@ -160,14 +158,13 @@ class Director {
             }
         }
 
-//        check the text, source, keywords, and then the different combos
         val updatedQuote = quote.copy(
             text = if (newText == "") quote.text else newText,
             source = if (newSource == "") quote.source else newSource,
             keywords = newKeywords.ifEmpty { quote.keywords }
         )
 
-        quotes[index] = updatedQuote
+        quotes[quoteMainIndex] = updatedQuote
     }
 
     private fun getQuoteText(quote: Quote): String {
@@ -204,7 +201,7 @@ class Director {
         outputService.deleteConfirmation()
         val input = inputService.inService()
         if (input == "Y" || input == "y") {
-            quotes.removeAt(index)
+            sortService.sortedQuotes.removeAt(index)
         }
         return
     }

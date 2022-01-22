@@ -1,20 +1,15 @@
 # Overview
 
-{Important! Do not say in this section that this is college assignment. Talk about what you are trying to accomplish as a software engineer to further your learning.}
+I wrote this program with the intent to learn and demonstrate the Kotlin language and become more familiar with developing programs using classes and objects.
 
-{Provide a description the software that you wrote to demonstrate the Kotlin language.}
+Quote Saver is an application that you can use to store quotes or sayings that are meaningful to you or you would like to remember. It has a feature that allows you to search for quotes by words, source, or a keyword. Further features allow you to edit and delete individual quotes. A keyword feature allows you to organize your quotes 
 
-{Describe your purpose for writing this software.}
 
-{Provide a link to your YouTube demonstration. It should be a 4-5 minute demo of the software running and a walkthrough of the code. Focus should be on sharing what you learned about the language syntax.}
-
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video](https://youtu.be/Hgx1548dUpw)
 
 # Development Environment
 
-{Describe the tools that you used to develop the software}
-
-{Describe the programming language that you used and any libraries.}
+I used Intellij IDEA Community Eidition with the Kotlin language. I took an object-oriented approach to the program to gain more experience using classes and objects. I used two Java libraries java.io and java.time. These libraries were used to handle the reading and writing of the file and creating a date object for each quote.
 
 # Useful Websites
 

@@ -196,9 +196,15 @@ class Director {
 //        input control
         when (inputService.inService()) {
 //            edit the quote
-            "E", "e" -> editQuote(index + outputService.scrollStart)
+            "E", "e" -> {
+                editQuote(index + outputService.scrollStart)
+                outputService.scrollStart = 0
+            }
 //            delete the quote
-            "D", "d" -> deleteQuote(index + outputService.scrollStart)
+            "D", "d" -> {
+                deleteQuote(index + outputService.scrollStart)
+                outputService.scrollStart = 0
+            }
 //            return to the search menu
             "R", "r" -> searchResultControl()
 //            anything else will rerun this function
@@ -304,10 +310,8 @@ class Director {
         outputService.deleteConfirmation()
         val input = inputService.inService()
         if (input == "Y" || input == "y") {
-
-//            delete the quote from both the sortedQuotes list and quotes list
-            sortService.sortedQuotes.removeAt(index)
-            quotes.removeAt(quoteMainIndex)
+//            delete the quote from the main list of quotes
+            quotes.remove(quote)
         }
         return
     }

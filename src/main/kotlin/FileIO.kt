@@ -42,7 +42,7 @@ class FileIO {
     }
 
     private fun configQuotes(quoteBlocks: String): Quote {
-        """Create each quote object from each quote block"""
+        """Create each quote object from each quote entry"""
 
 //        create the quote attributes for each quote
         val keyValues = quoteBlocks.split('/')

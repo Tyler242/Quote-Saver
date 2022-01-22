@@ -13,7 +13,7 @@ class Output {
         println("1. Search")
         println("2. View All")
         println("3. Add Quote")
-        println("4. Quit")
+        println("Q  to Quit")
         print("> ")
     }
 
@@ -132,4 +132,14 @@ class Output {
         println("\nAre you sure you want to delete this quote? (Y/N)")
         print("> ")
     }
+
+//    fun deleteSuccessful() {
+//        """Display a successful deletion message"""
+//        println("\nDeleted successfully.")
+//    }
+//
+//    fun deleteError() {
+//        """Display a successful deletion message"""
+//        println("\nCould not delete quote.")
+//    }
 }

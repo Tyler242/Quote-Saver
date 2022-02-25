@@ -52,7 +52,7 @@ class Output {
             if (x + scrollStart < lenQuotes) {
                 println("\n${(x+1)}. Quote: ${quotes[x + scrollStart].text}")
                 println("   Source: ${quotes[x + scrollStart].source}")
-                println("   Keywords: ${quotes[x + scrollStart].keywords}")
+                println("   Keywords: ${quotes[x + scrollStart].tags}")
             }
         }
 
@@ -72,8 +72,7 @@ class Output {
         println("\nQUOTE")
         println("Text: ${quote.text}")
         println("Source: ${quote.source}")
-        println("Date Added: ${quote.date}")
-        println("Keywords: ${quote.keywords}")
+        println("Keywords: ${quote.tags}")
         println("\nE to Edit")
         println("D to Delete")
         println("R to Return")
@@ -114,16 +113,13 @@ class Output {
         print("> ")
     }
 
-    fun editKeywords(quote: Quote? = null) {
+    fun editTags(tags: List<String>) {
         """Display keyword edit prompt"""
-        println("\n")
+        println()
 //        if we are editing an existing quote,
 //        display the current keywords for the quote
-        if (quote != null) {
-            println("${quote.keywords}")
-        }
-        println("Enter keywords (Do not include '/', '>', or '{'):")
-        println("Use ',' to separate different tags (eg tag 1,tag 2,tag 3)")
+        println("Current tags: $tags")
+        println("Enter new tag")
         print("> ")
     }
 

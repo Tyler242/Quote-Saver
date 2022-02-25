@@ -3,19 +3,17 @@ import java.time.LocalDate
 class Director {
 
 //    create objects of the classes we will use
+    private val quoteManager = QuoteManager()
     private val outputService = Output()
     private val inputService = Input()
-    private val fileService = FileIO()
-    private val sortService = Sorter()
 
-//    read the quotes from the file
-    private var quotes = fileService.readQuoteFile()
 
     fun start() {
-        """begins the program"""
+        /**
+         * begins the program
+         */
 
         programLoop()
-        fileService.writeQuoteFile(quotes)
     }
 
     private fun programLoop() {
@@ -30,13 +28,12 @@ class Director {
             when (inputService.inService()) {
 //                search option
                 "1" -> {
-                    sortService.quotesToSearch = quotes
                     search()
                 }
 //                view all option
                 "2" -> {
                     outputService.searchType = "View All"
-                    sortService.sortedQuotes = quotes
+                    quoteManager.findAll()
                     searchResultControl()
                 }
 //                add quote option
@@ -70,7 +67,8 @@ class Director {
 //            search by keyword option
             "3" -> {
                 outputService.searchType = "Keyword"
-                searchKeyword()
+//                searchKeyword()
+                println("Search by tag currently not implemented")
 
             }
 //            return to the previous menu
@@ -90,7 +88,7 @@ class Director {
         if (word != null) {
 
 //            sort the list of quotes by word
-            sortService.sortWord(word)
+            quoteManager.searchWord(word)
             searchResultControl()
         } else {
             outputService.creationError()
@@ -107,7 +105,7 @@ class Director {
         if (source != null) {
 
 //            sort the list of quotes by source
-            sortService.sortSource(source)
+            quoteManager.searchSource(source)
             searchResultControl()
         } else {
             outputService.creationError()
@@ -125,7 +123,7 @@ class Director {
         if (keywordToSearch != null) {
 
 //            sort the list of quotes by keyword
-            sortService.sortKeyword(keywordToSearch)
+//            TODO: (Implement query function for all quotes with tag)
             searchResultControl()
         } else {
             outputService.creationError()
@@ -135,7 +133,7 @@ class Director {
     private fun searchResultControl() {
         """Control the search result menu"""
 //        display the search result menu
-        outputService.searchResult(sortService.sortedQuotes)
+        outputService.searchResult(quoteManager.quoteList)
 
 //        input control
         when (inputService.inService()) {
@@ -173,25 +171,45 @@ class Director {
         outputService.editSource()
         val source = inputService.inService()
 
-//        get the keywords
-        outputService.editKeywords()
-        val keywordsString = inputService.inService()
-        val keywords: List<String> = keywordsString?.split(",") ?: listOf()
+//        get the tags
+        val tags = mutableListOf<String>()
 
+        var done = false
+        while (!done) {
+            println("Current tags: $tags")
+            println("Would you like to add a new tag? (Y/N)")
+            print("> ")
+            val input = inputService.inService()
+            if (input != null) {
+                if (input.uppercase() != "Y") {
+                    done = true
+                } else {
+                    println("\nEnter a new tag:")
+                    print("> ")
+                    val tag = inputService.inService()
+                    if (tag != null) {
+                        if (tag in tags) {
+                            println("Tag already entered")
+                        } else {
+                            tags.add(tag)
+                        }
+                    }
+                }
+            }
+        }
 //        simple validation of text and source
         if (text == null || source == null) {
             outputService.creationError()
             return
         }
-
-//        add a new quote object to the list
-        quotes.add(Quote(text, source, LocalDate.now(), keywords))
+//        create new quote
+        quoteManager.createQuote(text, source, tags)
     }
 
     private fun viewQuote(index: Int) {
         """Control the single quote menu"""
 //        display the quote
-        outputService.viewSingleQuote(sortService.sortedQuotes[index + outputService.scrollStart])
+        outputService.viewSingleQuote(quoteManager.quoteList[index + outputService.scrollStart])
 
 //        input control
         when (inputService.inService()) {
@@ -216,10 +234,7 @@ class Director {
         """Edit a quote"""
 
 //        get the quote
-        val quote = sortService.sortedQuotes[index]
-
-//        get the index of the quote within the main quotes array
-        val quoteMainIndex = quotes.indexOf(quote)
+        val quote = quoteManager.quoteList[index]
 
 //        variables for holding the new data
         var newText = ""
@@ -249,13 +264,15 @@ class Director {
 
 //        create a copy of the quote and update the variables if they were changed
         val updatedQuote = quote.copy(
+            id = quote.id,
             text = if (newText == "") quote.text else newText,
             source = if (newSource == "") quote.source else newSource,
-            keywords = newKeywords.ifEmpty { quote.keywords }
+            tags = newKeywords.ifEmpty { quote.tags }
         )
 
 //        replace the old quote with an updated copy
-        quotes[quoteMainIndex] = updatedQuote
+        quoteManager.quoteList[index] = updatedQuote
+        quoteManager.updateQuote(updatedQuote)
     }
 
     private fun getQuoteText(quote: Quote): String {
@@ -287,7 +304,7 @@ class Director {
     private fun getQuoteTags(quote: Quote): List<String> {
         """Get the quote keywords"""
 //        display the edit keywords menu
-        outputService.editKeywords(quote)
+        outputService.editTags(listOf())
 //        get and validate input
         val newKeywords = inputService.inService()
         if (newKeywords == null) {
@@ -301,17 +318,15 @@ class Director {
         """Delete a quote"""
 
 //        get the quote object to remove
-        val quote = sortService.sortedQuotes[index]
-
-//        find the index of the quote within the quotes list
-        val quoteMainIndex = quotes.indexOf(quote)
+        val quote = quoteManager.quoteList[index]
 
 //        confirm the user wants to delete the quote
         outputService.deleteConfirmation()
         val input = inputService.inService()
         if (input == "Y" || input == "y") {
 //            delete the quote from the main list of quotes
-            quotes.remove(quote)
+            quoteManager.quoteList.remove(quote)
+            quoteManager.removeQuote(quote)
         }
         return
     }

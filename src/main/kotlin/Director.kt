@@ -123,7 +123,6 @@ class Director {
         if (keywordToSearch != null) {
 
 //            sort the list of quotes by keyword
-//            TODO: (Implement query function for all quotes with tag)
             searchResultControl()
         } else {
             outputService.creationError()
